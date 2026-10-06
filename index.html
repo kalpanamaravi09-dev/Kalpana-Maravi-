@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Many Hist - Demo</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#0b1020;
+ color:white;
+}
+
+.app{
+ max-width:480px;
+ margin:auto;
+ padding:18px;
+}
+
+h1{
+ text-align:center;
+ margin:8px 0;
+}
+
+.subtitle{
+ text-align:center;
+ color:#9ca8c3;
+ font-size:13px;
+}
+
+.notice{
+ background:#172036;
+ border:1px solid #2c3a5c;
+ padding:10px;
+ border-radius:12px;
+ margin:15px 0;
+ text-align:center;
+ font-size:12px;
+ color:#cbd5e1;
+}
+
+.card{
+ background:#121a2d;
+ border:1px solid #293552;
+ border-radius:18px;
+ padding:16px;
+ margin:12px 0;
+}
+
+.balance{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.coins{
+ font-size:25px;
+ font-weight:bold;
+ margin-top:5px;
+}
+
+button{
+ border:0;
+ border-radius:12px;
+ padding:13px;
+ color:white;
+ font-size:15px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.reset{
+ background:#334155;
+ padding:9px 12px;
+}
+
+.deposit{
+ background:#16a34a;
+}
+
+.withdraw{
+ background:#dc2626;
+}
+
+.moneyButtons{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:8px;
+ margin-top:12px;
+}
+
+.moneyButtons button{
+ background:#334155;
+}
+
+.timer{
+ text-align:center;
+ font-size:42px;
+ font-weight:bold;
+ margin:8px;
+}
+
+.round{
+ text-align:center;
+ color:#9ca8c3;
+}
+
+.colors{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:9px;
+ margin-top:15px;
+}
+
+.red{background:#e53935}
+.green{background:#16a05a}
+.violet{background:#8b5cf6}
+
+.selected{
+ outline:4px solid white;
+ transform:translateY(-2px);
+}
+
+.confirm{
+ width:100%;
+ background:#2563eb;
+ margin-top:14px;
+}
+
+.disabled{
+ opacity:.45;
+}
+
+.msg{
+ text-align:center;
+ min-height:25px;
+ margin-top:12px;
+ font-weight:bold;
+}
+
+.stats{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+}
+
+.stat{
+ background:#0e1526;
+ padding:12px;
+ border-radius:12px;
+ text-align:center;
+}
+
+.history{
+ max-height:250px;
+ overflow:auto;
+}
+
+.row{
+ display:flex;
+ justify-content:space-between;
+ padding:9px 2px;
+ border-bottom:1px solid #26324e;
+ font-size:13px;
+}
+
+.dot{
+ display:inline-block;
+ width:10px;
+ height:10px;
+ border-radius:50%;
+ margin-right:6px;
+}
+
+.log{
+ margin-top:10px;
+ color:#4ade80;
+ text-align:center;
+ font-size:13px;
+ min-height:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>🎨 Many Hist</h1>
+
+<div class="subtitle">
+Color Prediction — Demo Version
+</div>
+
+<div class="notice">
+⚠️ DEMO ONLY — सभी Coins Virtual हैं। कोई Real Money या Payment नहीं।
+</div>
+
+
+<!-- BALANCE -->
+
+<div class="card balance">
+
+<div>
+<div style="color:#9ca8c3">
+Virtual Balance
+</div>
+
+<div class="coins">
+🪙 <span id="coins">1000</span>
+</div>
+</div>
+
+<button class="reset" onclick="resetGame()">
+Reset
+</button>
+
+</div>
+
+
+<!-- DEPOSIT -->
+
+<div class="card">
+
+<b>💰 Demo Deposit</b>
+
+<div style="color:#9ca8c3;font-size:12px;margin-top:5px">
+Virtual coins add करें
+</div>
+
+<div class="moneyButtons">
+
+<button onclick="deposit(100)">
++100
+</button>
+
+<button onclick="deposit(500)">
++500
+</button>
+
+<button onclick="deposit(1000)">
++1000
+</button>
+
+</div>
+
+<div id="depositLog" class="log"></div>
+
+</div>
+
+
+<!-- WITHDRAW -->
+
+<div class="card">
+
+<b>💸 Demo Withdraw</b>
+
+<div style="color:#9ca8c3;font-size:12px;margin-top:5px">
+केवल virtual coins withdraw होंगे
+</div>
+
+<div class="moneyButtons">
+
+<button onclick="withdrawCoins(100)">
+100
+</button>
+
+<button onclick="withdrawCoins(500)">
+500
+</button>
+
+<button onclick="withdrawCoins(1000)">
+1000
+</button>
+
+</div>
+
+<div id="withdrawLog" class="log"></div>
+
+</div>
+
+
+<!-- GAME -->
+
+<div class="card">
+
+<div class="round">
+Round <span id="round">1</span>
+</div>
+
+<div class="timer" id="timer">
+10
+</div>
+
+<div style="text-align:center;color:#9ca8c3">
+Timer खत्म होने से पहले Color चुनें
+</div>
+
+
+<div class="colors">
+
+<button class="color red" data-color="Red">
+🔴 Red
+</button>
+
+<button class="color green" data-color="Green">
+🟢 Green
+</button>
+
+<button class="color violet" data-color="Violet">
+🟣 Violet
+</button>
+
+</div>
+
+
+<button
+id="confirm"
+class="confirm disabled"
+disabled>
+
+Choose Color
+
+</button>
+
+<div class="msg" id="msg"></div>
+
+</div>
+
+
+<!-- STATS -->
+
+<div class="card stats">
+
+<div class="stat">
+🏆 Wins<br>
+<b id="wins">0</b>
+</div>
+
+<div class="stat">
+❌ Losses<br>
+<b id="losses">0</b>
+</div>
+
+</div>
+
+
+<!-- HISTORY -->
+
+<div class="card">
+
+<b>📜 Result History</b>
+
+<div
+class="history"
+id="history"
+style="margin-top:8px">
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+let coins = 1000;
+
+let round = 1;
+
+let time = 10;
+
+let selected = null;
+
+let wins = 0;
+
+let losses = 0;
+
+let timerId = null;
+
+let locked = false;
+
+
+const coinsEl =
+document.getElementById("coins");
+
+const timerEl =
+document.getElementById("timer");
+
+const roundEl =
+document.getElementById("round");
+
+const msgEl =
+document.getElementById("msg");
+
+const confirmBtn =
+document.getElementById("confirm");
+
+const historyEl =
+document.getElementById("history");
+
+
+function updateUI(){
+
+ coinsEl.textContent = coins;
+
+ roundEl.textContent = round;
+
+ document.getElementById("wins").textContent = wins;
+
+ document.getElementById("losses").textContent = losses;
+
+}
+
+
+/* DEMO DEPOSIT */
+
+function deposit(amount){
+
+ coins += amount;
+
+ document.getElementById("depositLog").textContent =
+ "+" + amount + " Virtual Coins Added ✓";
+
+ updateUI();
+
+ setTimeout(()=>{
+
+  document.getElementById("depositLog").textContent="";
+
+ },1500);
+
+}
+
+
+/* DEMO WITHDRAW */
+
+function withdrawCoins(amount){
+
+ if(coins < amount){
+
+  document.getElementById("withdrawLog").style.color =
+  "#f87171";
+
+  document.getElementById("withdrawLog").textContent =
+  "❌ पर्याप्त Virtual Coins नहीं हैं";
+
+  setTimeout(()=>{
+
+   document.getElementById("withdrawLog").textContent="";
+
+  },1800);
+
+  return;
+
+ }
+
+ coins -= amount;
+
+ document.getElementById("withdrawLog").style.color =
+ "#4ade80";
+
+ document.getElementById("withdrawLog").textContent =
+ "✓ " + amount +
+ " Virtual Coins Withdrawn (Demo)";
+
+ updateUI();
+
+ setTimeout(()=>{
+
+  document.getElementById("withdrawLog").textContent="";
+
+ },1800);
+
+}
+
+
+/* TIMER */
+
+function startTimer(){
+
+ clearInterval(timerId);
+
+ time = 10;
+
+ timerEl.textContent = time;
+
+ locked = false;
+
+ timerId = setInterval(()=>{
+
+  time--;
+
+  timerEl.textContent = time;
+
+  if(time <= 0){
+
+   clearInterval(timerId);
+
+   finishRound();
+
+  }
+
+ },1000);
+
+}
+
+
+/* COLOR SELECT */
+
+document
+.querySelectorAll(".color")
+.forEach(button=>{
+
+ button.addEventListener("click",()=>{
+
+  if(locked) return;
+
+  document
+  .querySelectorAll(".color")
+  .forEach(b =>
+   b.classList.remove("selected")
+  );
+
+  button.classList.add("selected");
+
+  selected =
+  button.dataset.color;
+
+  confirmBtn.disabled = false;
+
+  confirmBtn.classList.remove("disabled");
+
+  confirmBtn.textContent =
+  "Confirm " + selected;
+
+ });
+
+});
+
+
+/* CONFIRM */
+
+confirmBtn.addEventListener("click",()=>{
+
+ if(!selected || locked) return;
+
+ clearInterval(timerId);
+
+ finishRound();
+
+});
+
+
+/* GAME RESULT */
+
+function finishRound(){
+
+ if(locked) return;
+
+ locked = true;
+
+ const colors =
+ ["Red","Green","Violet"];
+
+ const result =
+ colors[
+  Math.floor(
+   Math.random()*colors.length
+  )
+ ];
+
+ let message = "";
+
+ if(selected === result){
+
+  coins += 100;
+
+  wins++;
+
+  message =
+  "🎉 सही Color! +100 Virtual Coins";
+
+ }else{
+
+  coins =
+  Math.max(0,coins-50);
+
+  losses++;
+
+  message =
+  "❌ गलत Color! -50 Virtual Coins";
+
+ }
+
+
+ addHistory(result,selected);
+
+
+ msgEl.textContent =
+ "Result: " +
+ result +
+ " — " +
+ message;
+
+
+ document
+ .querySelectorAll(".color")
+ .forEach(b =>
+  b.classList.remove("selected")
+ );
+
+
+ selected = null;
+
+ confirmBtn.disabled = true;
+
+ confirmBtn.classList.add("disabled");
+
+ confirmBtn.textContent =
+ "Choose Color";
+
+ updateUI();
+
+
+ setTimeout(()=>{
+
+  round++;
+
+  msgEl.textContent = "";
+
+  updateUI();
+
+  startTimer();
+
+ },1800);
+
+}
+
+
+/* HISTORY */
+
+function addHistory(result,pick){
+
+ const row =
+ document.createElement("div");
+
+ row.className = "row";
+
+ let dotColor;
+
+ if(result === "Red")
+  dotColor = "#e53935";
+
+ else if(result === "Green")
+  dotColor = "#16a05a";
+
+ else
+  dotColor = "#8b5cf6";
+
+
+ row.innerHTML = `
+
+ <span>
+
+ <i class="dot"
+ style="background:${dotColor}">
+ </i>
+
+ Result: ${result}
+
+ </span>
+
+ <span>
+ Pick: ${pick}
+ </span>
+
+ `;
+
+
+ historyEl.prepend(row);
+
+}
+
+
+/* RESET */
+
+function resetGame(){
+
+ clearInterval(timerId);
+
+ coins = 1000;
+
+ round = 1;
+
+ wins = 0;
+
+ losses = 0;
+
+ selected = null;
+
+ historyEl.innerHTML = "";
+
+ msgEl.textContent = "";
+
+ confirmBtn.disabled = true;
+
+ confirmBtn.classList.add("disabled");
+
+ confirmBtn.textContent =
+ "Choose Color";
+
+ updateUI();
+
+ startTimer();
+
+}
+
+
+/* START */
+
+updateUI();
+
+startTimer();
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Many Hist - Demo</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#0b1020;
+ color:white;
+}
+
+.app{
+ max-width:480px;
+ margin:auto;
+ padding:18px;
+}
+
+h1{
+ text-align:center;
+ margin:8px 0;
+}
+
+.subtitle{
+ text-align:center;
+ color:#9ca8c3;
+ font-size:13px;
+}
+
+.notice{
+ background:#172036;
+ border:1px solid #2c3a5c;
+ padding:10px;
+ border-radius:12px;
+ margin:15px 0;
+ text-align:center;
+ font-size:12px;
+ color:#cbd5e1;
+}
+
+.card{
+ background:#121a2d;
+ border:1px solid #293552;
+ border-radius:18px;
+ padding:16px;
+ margin:12px 0;
+}
+
+.balance{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.coins{
+ font-size:25px;
+ font-weight:bold;
+ margin-top:5px;
+}
+
+button{
+ border:0;
+ border-radius:12px;
+ padding:13px;
+ color:white;
+ font-size:15px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.reset{
+ background:#334155;
+ padding:9px 12px;
+}
+
+.deposit{
+ background:#16a34a;
+}
+
+.withdraw{
+ background:#dc2626;
+}
+
+.moneyButtons{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:8px;
+ margin-top:12px;
+}
+
+.moneyButtons button{
+ background:#334155;
+}
+
+.timer{
+ text-align:center;
+ font-size:42px;
+ font-weight:bold;
+ margin:8px;
+}
+
+.round{
+ text-align:center;
+ color:#9ca8c3;
+}
+
+.colors{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:9px;
+ margin-top:15px;
+}
+
+.red{background:#e53935}
+.green{background:#16a05a}
+.violet{background:#8b5cf6}
+
+.selected{
+ outline:4px solid white;
+ transform:translateY(-2px);
+}
+
+.confirm{
+ width:100%;
+ background:#2563eb;
+ margin-top:14px;
+}
+
+.disabled{
+ opacity:.45;
+}
+
+.msg{
+ text-align:center;
+ min-height:25px;
+ margin-top:12px;
+ font-weight:bold;
+}
+
+.stats{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+}
+
+.stat{
+ background:#0e1526;
+ padding:12px;
+ border-radius:12px;
+ text-align:center;
+}
+
+.history{
+ max-height:250px;
+ overflow:auto;
+}
+
+.row{
+ display:flex;
+ justify-content:space-between;
+ padding:9px 2px;
+ border-bottom:1px solid #26324e;
+ font-size:13px;
+}
+
+.dot{
+ display:inline-block;
+ width:10px;
+ height:10px;
+ border-radius:50%;
+ margin-right:6px;
+}
+
+.log{
+ margin-top:10px;
+ color:#4ade80;
+ text-align:center;
+ font-size:13px;
+ min-height:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>🎨 Many Hist</h1>
+
+<div class="subtitle">
+Color Prediction — Demo Version
+</div>
+
+<div class="notice">
+⚠️ DEMO ONLY — सभी Coins Virtual हैं। कोई Real Money या Payment नहीं।
+</div>
+
+
+<!-- BALANCE -->
+
+<div class="card balance">
+
+<div>
+<div style="color:#9ca8c3">
+Virtual Balance
+</div>
+
+<div class="coins">
+🪙 <span id="coins">1000</span>
+</div>
+</div>
+
+<button class="reset" onclick="resetGame()">
+Reset
+</button>
+
+</div>
+
+
+<!-- DEPOSIT -->
+
+<div class="card">
+
+<b>💰 Demo Deposit</b>
+
+<div style="color:#9ca8c3;font-size:12px;margin-top:5px">
+Virtual coins add करें
+</div>
+
+<div class="moneyButtons">
+
+<button onclick="deposit(100)">
++100
+</button>
+
+<button onclick="deposit(500)">
++500
+</button>
+
+<button onclick="deposit(1000)">
++1000
+</button>
+
+</div>
+
+<div id="depositLog" class="log"></div>
+
+</div>
+
+
+<!-- WITHDRAW -->
+
+<div class="card">
+
+<b>💸 Demo Withdraw</b>
+
+<div style="color:#9ca8c3;font-size:12px;margin-top:5px">
+केवल virtual coins withdraw होंगे
+</div>
+
+<div class="moneyButtons">
+
+<button onclick="withdrawCoins(100)">
+100
+</button>
+
+<button onclick="withdrawCoins(500)">
+500
+</button>
+
+<button onclick="withdrawCoins(1000)">
+1000
+</button>
+
+</div>
+
+<div id="withdrawLog" class="log"></div>
+
+</div>
+
+
+<!-- GAME -->
+
+<div class="card">
+
+<div class="round">
+Round <span id="round">1</span>
+</div>
+
+<div class="timer" id="timer">
+10
+</div>
+
+<div style="text-align:center;color:#9ca8c3">
+Timer खत्म होने से पहले Color चुनें
+</div>
+
+
+<div class="colors">
+
+<button class="color red" data-color="Red">
+🔴 Red
+</button>
+
+<button class="color green" data-color="Green">
+🟢 Green
+</button>
+
+<button class="color violet" data-color="Violet">
+🟣 Violet
+</button>
+
+</div>
+
+
+<button
+id="confirm"
+class="confirm disabled"
+disabled>
+
+Choose Color
+
+</button>
+
+<div class="msg" id="msg"></div>
+
+</div>
+
+
+<!-- STATS -->
+
+<div class="card stats">
+
+<div class="stat">
+🏆 Wins<br>
+<b id="wins">0</b>
+</div>
+
+<div class="stat">
+❌ Losses<br>
+<b id="losses">0</b>
+</div>
+
+</div>
+
+
+<!-- HISTORY -->
+
+<div class="card">
+
+<b>📜 Result History</b>
+
+<div
+class="history"
+id="history"
+style="margin-top:8px">
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+let coins = 1000;
+
+let round = 1;
+
+let time = 10;
+
+let selected = null;
+
+let wins = 0;
+
+let losses = 0;
+
+let timerId = null;
+
+let locked = false;
+
+
+const coinsEl =
+document.getElementById("coins");
+
+const timerEl =
+document.getElementById("timer");
+
+const roundEl =
+document.getElementById("round");
+
+const msgEl =
+document.getElementById("msg");
+
+const confirmBtn =
+document.getElementById("confirm");
+
+const historyEl =
+document.getElementById("history");
+
+
+function updateUI(){
+
+ coinsEl.textContent = coins;
+
+ roundEl.textContent = round;
+
+ document.getElementById("wins").textContent = wins;
+
+ document.getElementById("losses").textContent = losses;
+
+}
+
+
+/* DEMO DEPOSIT */
+
+function deposit(amount){
+
+ coins += amount;
+
+ document.getElementById("depositLog").textContent =
+ "+" + amount + " Virtual Coins Added ✓";
+
+ updateUI();
+
+ setTimeout(()=>{
+
+  document.getElementById("depositLog").textContent="";
+
+ },1500);
+
+}
+
+
+/* DEMO WITHDRAW */
+
+function withdrawCoins(amount){
+
+ if(coins < amount){
+
+  document.getElementById("withdrawLog").style.color =
+  "#f87171";
+
+  document.getElementById("withdrawLog").textContent =
+  "❌ पर्याप्त Virtual Coins नहीं हैं";
+
+  setTimeout(()=>{
+
+   document.getElementById("withdrawLog").textContent="";
+
+  },1800);
+
+  return;
+
+ }
+
+ coins -= amount;
+
+ document.getElementById("withdrawLog").style.color =
+ "#4ade80";
+
+ document.getElementById("withdrawLog").textContent =
+ "✓ " + amount +
+ " Virtual Coins Withdrawn (Demo)";
+
+ updateUI();
+
+ setTimeout(()=>{
+
+  document.getElementById("withdrawLog").textContent="";
+
+ },1800);
+
+}
+
+
+/* TIMER */
+
+function startTimer(){
+
+ clearInterval(timerId);
+
+ time = 10;
+
+ timerEl.textContent = time;
+
+ locked = false;
+
+ timerId = setInterval(()=>{
+
+  time--;
+
+  timerEl.textContent = time;
+
+  if(time <= 0){
+
+   clearInterval(timerId);
+
+   finishRound();
+
+  }
+
+ },1000);
+
+}
+
+
+/* COLOR SELECT */
+
+document
+.querySelectorAll(".color")
+.forEach(button=>{
+
+ button.addEventListener("click",()=>{
+
+  if(locked) return;
+
+  document
+  .querySelectorAll(".color")
+  .forEach(b =>
+   b.classList.remove("selected")
+  );
+
+  button.classList.add("selected");
+
+  selected =
+  button.dataset.color;
+
+  confirmBtn.disabled = false;
+
+  confirmBtn.classList.remove("disabled");
+
+  confirmBtn.textContent =
+  "Confirm " + selected;
+
+ });
+
+});
+
+
+/* CONFIRM */
+
+confirmBtn.addEventListener("click",()=>{
+
+ if(!selected || locked) return;
+
+ clearInterval(timerId);
+
+ finishRound();
+
+});
+
+
+/* GAME RESULT */
+
+function finishRound(){
+
+ if(locked) return;
+
+ locked = true;
+
+ const colors =
+ ["Red","Green","Violet"];
+
+ const result =
+ colors[
+  Math.floor(
+   Math.random()*colors.length
+  )
+ ];
+
+ let message = "";
+
+ if(selected === result){
+
+  coins += 100;
+
+  wins++;
+
+  message =
+  "🎉 सही Color! +100 Virtual Coins";
+
+ }else{
+
+  coins =
+  Math.max(0,coins-50);
+
+  losses++;
+
+  message =
+  "❌ गलत Color! -50 Virtual Coins";
+
+ }
+
+
+ addHistory(result,selected);
+
+
+ msgEl.textContent =
+ "Result: " +
+ result +
+ " — " +
+ message;
+
+
+ document
+ .querySelectorAll(".color")
+ .forEach(b =>
+  b.classList.remove("selected")
+ );
+
+
+ selected = null;
+
+ confirmBtn.disabled = true;
+
+ confirmBtn.classList.add("disabled");
+
+ confirmBtn.textContent =
+ "Choose Color";
+
+ updateUI();
+
+
+ setTimeout(()=>{
+
+  round++;
+
+  msgEl.textContent = "";
+
+  updateUI();
+
+  startTimer();
+
+ },1800);
+
+}
+
+
+/* HISTORY */
+
+function addHistory(result,pick){
+
+ const row =
+ document.createElement("div");
+
+ row.className = "row";
+
+ let dotColor;
+
+ if(result === "Red")
+  dotColor = "#e53935";
+
+ else if(result === "Green")
+  dotColor = "#16a05a";
+
+ else
+  dotColor = "#8b5cf6";
+
+
+ row.innerHTML = `
+
+ <span>
+
+ <i class="dot"
+ style="background:${dotColor}">
+ </i>
+
+ Result: ${result}
+
+ </span>
+
+ <span>
+ Pick: ${pick}
+ </span>
+
+ `;
+
+
+ historyEl.prepend(row);
+
+}
+
+
+/* RESET */
+
+function resetGame(){
+
+ clearInterval(timerId);
+
+ coins = 1000;
+
+ round = 1;
+
+ wins = 0;
+
+ losses = 0;
+
+ selected = null;
+
+ historyEl.innerHTML = "";
+
+ msgEl.textContent = "";
+
+ confirmBtn.disabled = true;
+
+ confirmBtn.classList.add("disabled");
+
+ confirmBtn.textContent =
+ "Choose Color";
+
+ updateUI();
+
+ startTimer();
+
+}
+
+
+/* START */
+
+updateUI();
+
+startTimer();
+
+</script>
